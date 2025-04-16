@@ -1,6 +1,6 @@
-import streamlit as st
+# -*- coding: utf-8 -*-
 
-cat -A modules/auth.py
+import streamlit as st
 
 from modules.auth import get_current_user, logout_user, auto_login_super_admin
 
