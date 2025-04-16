@@ -7,6 +7,7 @@ from datetime import datetime
 from modules.auth import get_current_user
 from modules.payments import get_all_payments, update_payment_status
 from modules.audit import log_action
+from modules.emailer import send_email_with_attachment
 
 EXPORT_DIR = "exports"
 os.makedirs(EXPORT_DIR, exist_ok=True)
