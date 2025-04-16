@@ -1,5 +1,7 @@
 import streamlit as st
 
+cat -A modules/auth.py
+
 from modules.auth import get_current_user, logout_user, auto_login_super_admin
 
 
