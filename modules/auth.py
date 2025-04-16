@@ -1,5 +1,5 @@
 import streamlit as st
-from firebase_admin import auth, db
+from firebase_config import auth, db  ✅
 
 SUPER_ADMIN_EMAIL = "ammar.muhammed@geg-construction.com"
 SUPER_ADMIN_PASSWORD = "AmmarGEG99$"
