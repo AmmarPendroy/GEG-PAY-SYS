@@ -51,6 +51,7 @@ def login_user(email, password):
         st.error("Login failed. Check your email and password.")
 
 def register_user(name, email, password, role, project, is_hq):
+    st.toast("📝 Registration submitted. Awaiting approval.")
     try:
         user = auth.create_user(email=email, password=password)
         uid = user.uid
