@@ -1,17 +1,17 @@
 import streamlit as st
-from modules.payments import submit_payment
 from modules.auth import get_current_user
+from modules.payments import submit_payment
 
 def show():
     st.title("📤 Submit Payment Request")
-    
+
     user = get_current_user()
     if not user:
-        st.warning("Please log in first.")
+        st.warning("Please log in.")
         return
-    
+
     st.markdown(f"**Submitting for project:** `{user['project']}`")
-    
+
     contractor = st.text_input("Contractor Name")
     amount = st.number_input("Amount", min_value=0.0, format="%.2f")
     work_period = st.date_input("Work Period")
