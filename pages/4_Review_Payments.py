@@ -1,8 +1,15 @@
 import streamlit as st
 import pandas as pd
+import os
+from fpdf import FPDF
+from datetime import datetime
+
 from modules.auth import get_current_user
 from modules.payments import get_all_payments, update_payment_status
-from fpdf import FPDF
+from modules.audit import log_action
+
+EXPORT_DIR = "exports"
+os.makedirs(EXPORT_DIR, exist_ok=True)
 
 def generate_pdf(data, filename):
     pdf = FPDF()
@@ -10,7 +17,7 @@ def generate_pdf(data, filename):
     pdf.set_font("Arial", size=12)
     for key, value in data.items():
         pdf.cell(200, 10, txt=f"{key}: {value}", ln=True)
-    pdf.output(filename)
+    pdf.output(os.path.join(EXPORT_DIR, filename))
 
 def show():
     st.title("🧾 Review Submitted Payments")
@@ -46,10 +53,13 @@ def show():
                 col1, col2 = st.columns(2)
                 if col1.button("✅ Approve", key=f"approve_{i}"):
                     update_payment_status(i, "approved")
-                    generate_pdf(row.to_dict(), f"approved_payment_{i}.pdf")
-                    st.success("Approved and exported as PDF.")
+                    filename = f"{row['project']}_{row['contractor']}_{i}.pdf"
+                    generate_pdf(row.to_dict(), filename)
+                    log_action(user["email"], "approved", row.to_dict(), filename)
+                    st.success(f"Approved and saved as {filename}")
                     st.experimental_rerun()
                 if col2.button("❌ Reject", key=f"reject_{i}"):
                     update_payment_status(i, "rejected")
+                    log_action(user["email"], "rejected", row.to_dict())
                     st.warning("Rejected.")
                     st.experimental_rerun()
