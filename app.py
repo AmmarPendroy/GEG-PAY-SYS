@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-
 import streamlit as st
-
 from modules.auth import get_current_user, logout_user, auto_login_super_admin
 
 
