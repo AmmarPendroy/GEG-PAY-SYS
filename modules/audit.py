@@ -1,11 +1,7 @@
-import pandas as pd
-import os
+from firebase_admin import db
 from datetime import datetime
 
-AUDIT_LOG = "data/audit_log.csv"
-
 def log_action(user_email, action, payment_data, filename=""):
-    os.makedirs("data", exist_ok=True)
     entry = {
         "timestamp": datetime.utcnow().isoformat(),
         "user": user_email,
@@ -15,11 +11,10 @@ def log_action(user_email, action, payment_data, filename=""):
         "amount": payment_data.get("amount", ""),
         "filename": filename
     }
+    db.reference("audit").push(entry)
 
-    if os.path.exists(AUDIT_LOG):
-        df = pd.read_csv(AUDIT_LOG)
-    else:
-        df = pd.DataFrame(columns=entry.keys())
-
-    df = pd.concat([df, pd.DataFrame([entry])], ignore_index=True)
-    df.to_csv(AUDIT_LOG, index=False)
+def get_all_audit_logs():
+    data = db.reference("audit").get()
+    if not data:
+        return []
+    return list(data.values())
