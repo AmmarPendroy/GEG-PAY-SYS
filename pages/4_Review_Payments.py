@@ -32,17 +32,14 @@ def show():
         return
 
     payments = get_all_payments()
-    if payments.empty:
+    if not payments:
         st.info("No payments found.")
         return
 
-    project_filter = st.selectbox("Filter by Project", options=["All"] + sorted(payments["project"].unique().tolist()))
-    
-    if project_filter != "All":
-        payments = payments[payments["project"] == project_filter]
+    project_filter = st.selectbox("Filter by Project", options=["All"] + sorted(set(p["project"] for p in payments)))
+    filtered = [p for p in payments if p["project"] == project_filter] if project_filter != "All" else payments
 
-    st.write(f"Showing {len(payments)} records.")
-    for i, row in payments.iterrows():
+    for i, row in enumerate(filtered):
         with st.expander(f"{row['contractor']} – {row['amount']} USD – {row['status'].upper()}"):
             st.write(f"**Project:** {row['project']}")
             st.write(f"**Work Period:** {row['work_period']}")
@@ -57,32 +54,35 @@ def show():
                 col1, col2 = st.columns(2)
 
                 if col1.button("✅ Approve", key=f"approve_{i}"):
-                    update_payment_status(i, "approved")
-                    generate_pdf(row.to_dict(), filename)
-                    log_action(user["email"], "approved", row.to_dict(), filename)
+                    update_payment_status(row["id"], "approved")
+                    generate_pdf(row, filename)
+                    log_action(user["email"], "approved", row, filename)
                     send_email_with_attachment(
                         user["email"],
                         "Payment Approved",
-                        f"Payment for {row['contractor']} has been approved and exported as PDF.",
+                        f"Payment for {row['contractor']} has been approved.",
                         filepath
                     )
                     st.success(f"Approved and saved as {filename}")
-                    st.toast("✅ Payment approved and saved.")
+                    st.toast("✅ Payment approved and PDF saved.")
                     st.experimental_rerun()
 
                 if col2.button("❌ Reject", key=f"reject_{i}"):
-                    update_payment_status(i, "rejected")
-                    log_action(user["email"], "rejected", row.to_dict())
+                    update_payment_status(row["id"], "rejected")
+                    log_action(user["email"], "rejected", row)
                     st.warning("Rejected.")
                     st.toast("❌ Payment rejected.")
                     st.experimental_rerun()
 
-            if row["status"] == "approved" and os.path.exists(filepath):
-                with open(filepath, "rb") as f:
-                    st.download_button(
-                        label="📄 Download PDF",
-                        data=f.read(),
-                        file_name=filename,
-                        mime="application/pdf",
-                        key=f"dl_{i}"
-                    )
+            if row["status"] == "approved":
+                try:
+                    with open(filepath, "rb") as f:
+                        st.download_button(
+                            label="📄 Download PDF",
+                            data=f.read(),
+                            file_name=filename,
+                            mime="application/pdf",
+                            key=f"dl_{i}"
+                        )
+                except FileNotFoundError:
+                    st.warning("⚠️ PDF file not found.")
