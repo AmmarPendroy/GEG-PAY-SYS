@@ -50,12 +50,14 @@ def show():
             st.write(f"**Description:**\n{row['description']}")
             st.write(f"**Submitted At:** {row['submitted_at']}")
 
+            filename = f"{row['project']}_{row['contractor']}_{i}.pdf"
+            filepath = os.path.join(EXPORT_DIR, filename)
+
             if row["status"] == "pending":
                 col1, col2 = st.columns(2)
+
                 if col1.button("✅ Approve", key=f"approve_{i}"):
                     update_payment_status(i, "approved")
-                    filename = f"{row['project']}_{row['contractor']}_{i}.pdf"
-                    filepath = os.path.join(EXPORT_DIR, filename)
                     generate_pdf(row.to_dict(), filename)
                     log_action(user["email"], "approved", row.to_dict(), filename)
                     send_email_with_attachment(
@@ -64,11 +66,23 @@ def show():
                         f"Payment for {row['contractor']} has been approved and exported as PDF.",
                         filepath
                     )
-                    st.success(f"Approved, emailed, and saved as {filename}")
+                    st.success(f"Approved and saved as {filename}")
+                    st.toast("✅ Payment approved and saved.")
                     st.experimental_rerun()
 
                 if col2.button("❌ Reject", key=f"reject_{i}"):
                     update_payment_status(i, "rejected")
                     log_action(user["email"], "rejected", row.to_dict())
                     st.warning("Rejected.")
+                    st.toast("❌ Payment rejected.")
                     st.experimental_rerun()
+
+            if row["status"] == "approved" and os.path.exists(filepath):
+                with open(filepath, "rb") as f:
+                    st.download_button(
+                        label="📄 Download PDF",
+                        data=f.read(),
+                        file_name=filename,
+                        mime="application/pdf",
+                        key=f"dl_{i}"
+                    )
