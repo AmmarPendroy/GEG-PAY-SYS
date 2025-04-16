@@ -1,12 +1,23 @@
-import pandas as pd
-import os
+from firebase_admin import db
 
-USERS_CSV = "data/users.csv"
+def get_all_users():
+    ref = db.reference("users")
+    users = ref.get()
+    if not users:
+        return []
+    return [{**data, "uid": uid} for uid, data in users.items()]
 
-def load_users():
-    if not os.path.exists(USERS_CSV):
-        return pd.DataFrame(columns=["email", "name", "role", "project", "status"])
-    return pd.read_csv(USERS_CSV)
+def get_pending_users():
+    return [u for u in get_all_users() if u.get("status") == "pending"]
 
-def save_users(df):
-    df.to_csv(USERS_CSV, index=False)
+def approve_user(uid):
+    ref = db.reference(f"users/{uid}")
+    ref.update({"status": "approved"})
+
+def reject_user(uid):
+    ref = db.reference(f"users/{uid}")
+    ref.update({"status": "rejected"})
+
+def update_user(uid, updates: dict):
+    ref = db.reference(f"users/{uid}")
+    ref.update(updates)
