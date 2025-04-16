@@ -1,12 +1,26 @@
-import pandas as pd
-import os
-
-PROJECTS_CSV = "data/projects.csv"
+from firebase_admin import db
 
 def load_projects():
-    if not os.path.exists(PROJECTS_CSV):
-        return pd.DataFrame(columns=["name", "location", "remark"])
-    return pd.read_csv(PROJECTS_CSV)
+    ref = db.reference("projects")
+    projects_data = ref.get()
 
-def save_projects(df):
-    df.to_csv(PROJECTS_CSV, index=False)
+    if not projects_data:
+        return ["ZAS4"]
+
+    return [proj.get("name") for proj in projects_data.values() if "name" in proj]
+
+def get_all_project_dicts():
+    """Returns list of all projects as dicts with name/location/remark"""
+    ref = db.reference("projects")
+    data = ref.get()
+    if not data:
+        return []
+    return list(data.values())
+
+def add_project(name, location, remark):
+    ref = db.reference("projects")
+    ref.push({
+        "name": name,
+        "location": location,
+        "remark": remark
+    })
