@@ -1,6 +1,12 @@
-[firebase]
-database_url = "https://geg-pay-sys.firebaseio.com"
+import streamlit as st
+import firebase_admin
+from firebase_admin import credentials, auth, db
 
-[email]
-sender = "ammar.muhammed@geg-construction.com"
-password = "AmmarGEG99$"
+# Load Admin SDK credentials
+cred = credentials.Certificate("geg-pay-sys-firebase-adminsdk-fbsvc-949f2a165b.json")
+
+# Initialize Firebase app once
+if not firebase_admin._apps:
+    firebase_admin.initialize_app(cred, {
+        "databaseURL": st.secrets["firebase"]["database_url"]
+    })
