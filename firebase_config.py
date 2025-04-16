@@ -1,5 +1,5 @@
-import pyrebase
 import streamlit as st
+import pyrebase
 
 firebase_config = {
     "apiKey": st.secrets["firebase"]["api_key"],
@@ -13,3 +13,5 @@ firebase_config = {
 
 firebase = pyrebase.initialize_app(firebase_config)
 auth = firebase.auth()
+db = firebase.database()
+storage = firebase.storage()
