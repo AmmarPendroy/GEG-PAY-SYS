@@ -1,3 +1,4 @@
+__init__.py
 import streamlit as st
 from firebase_config import auth, db  ✅
 
