@@ -1,7 +1,6 @@
 import streamlit as st
-import pandas as pd
 from modules.auth import get_current_user
-from modules.projects import load_projects, save_projects
+from modules.projects import get_all_project_dicts, add_project
 
 def show():
     st.title("🏗️ Manage Projects")
@@ -10,9 +9,12 @@ def show():
         st.error("Access restricted to HQ Project Director.")
         return
 
-    projects = load_projects()
     st.subheader("Existing Projects")
-    st.dataframe(projects)
+    projects = get_all_project_dicts()
+    if projects:
+        st.table(projects)
+    else:
+        st.info("No projects found.")
 
     st.subheader("Add New Project")
     name = st.text_input("Project Name")
@@ -22,15 +24,7 @@ def show():
     if st.button("Add Project"):
         if not name or not location:
             st.warning("Project name and location are required.")
-        elif name in projects["name"].values:
-            st.warning("Project already exists.")
         else:
-            new_row = pd.DataFrame([{
-                "name": name,
-                "location": location,
-                "remark": remark
-            }])
-            projects = pd.concat([projects, new_row], ignore_index=True)
-            save_projects(projects)
-            st.success("Project added!")
+            add_project(name, location, remark)
+            st.success("Project added successfully.")
             st.experimental_rerun()
