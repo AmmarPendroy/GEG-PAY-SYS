@@ -1,6 +1,6 @@
 import streamlit as st
 
-from modules.auth import get_current_user
+
 from modules.auth import logout_user
 from modules.auth import auto_login_super_admin
 
