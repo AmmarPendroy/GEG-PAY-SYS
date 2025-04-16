@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import streamlit as st
 from firebase_config import auth, db  ✅
 
