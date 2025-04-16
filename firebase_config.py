@@ -1,17 +1,12 @@
 import streamlit as st
-import pyrebase
+import firebase_admin
+from firebase_admin import credentials, auth, db
 
-firebase_config = {
-    "apiKey": st.secrets["firebase"]["api_key"],
-    "authDomain": st.secrets["firebase"]["auth_domain"],
-    "projectId": st.secrets["firebase"]["project_id"],
-    "storageBucket": st.secrets["firebase"]["storage_bucket"],
-    "messagingSenderId": st.secrets["firebase"]["messaging_sender_id"],
-    "appId": st.secrets["firebase"]["app_id"],
-    "databaseURL": st.secrets["firebase"]["database_url"]
-}
+# Load Admin SDK credentials
+cred = credentials.Certificate("geg-pay-sys-firebase-adminsdk-fbsvc-949f2a165b.json")
 
-firebase = pyrebase.initialize_app(firebase_config)
-auth = firebase.auth()
-db = firebase.database()
-storage = firebase.storage()
+# Initialize Firebase app once
+if not firebase_admin._apps:
+    firebase_admin.initialize_app(cred, {
+        "databaseURL": st.secrets["firebase"]["database_url"]
+    })
