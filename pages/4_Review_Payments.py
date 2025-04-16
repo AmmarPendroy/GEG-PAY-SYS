@@ -10,7 +10,7 @@ from modules.audit import log_action
 from modules.emailer import send_email_with_attachment
 
 EXPORT_DIR = "exports"
-os.makedirs(EXPORT_DIR, exist_ok=True)
+os.makedirs("exports", exist_ok=True)
 
 def generate_pdf(data, filename):
     pdf = FPDF()
