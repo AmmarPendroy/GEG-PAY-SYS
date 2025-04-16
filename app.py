@@ -7,7 +7,7 @@ auto_login_super_admin()
 st.set_page_config(page_title="GEG Contractor Payment", layout="wide")
 user = get_current_user()
 
-# Sidebar always shows logo + logout (if logged in)
+# Sidebar
 st.sidebar.image("assets/logo.png", use_column_width=True)
 if user:
     st.sidebar.markdown(f"**Logged in as:** {user['email']}")
@@ -35,6 +35,9 @@ def show_menu():
     if role == "hq_pd":
         menu.append("Manage Projects")
 
+    if role in ["hq_pd", "hq_admin", "super_admin"]:
+        menu.append("Site Charts")
+
     menu.append("Help Guide")
 
     return st.sidebar.radio("Navigate", menu)
@@ -54,5 +57,7 @@ else:
         st.switch_page("pages/6_Manage_Users.py")
     elif page == "Manage Projects":
         st.switch_page("pages/7_Manage_Projects.py")
+    elif page == "Site Charts":
+        st.switch_page("pages/8_Site_Charts.py")
     elif page == "Help Guide":
         st.switch_page("pages/1_Help_guide.py")
