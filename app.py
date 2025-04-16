@@ -1,6 +1,6 @@
 import streamlit as st
 
-from AUTH import get_current_user, logout_user, auto_login_super_admin
+from streamlit.auth1 import get_current_user, logout_user, auto_login_super_admin
 
 
 # Load user session or auto-login if super admin
