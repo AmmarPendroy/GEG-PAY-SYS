@@ -1,19 +1,8 @@
 import streamlit as st
-from firebase_config import auth
-import pandas as pd
-import os
+from firebase_admin import auth, db
 
-USERS_CSV = "data/users.csv"
 SUPER_ADMIN_EMAIL = "ammar.muhammed@geg-construction.com"
 SUPER_ADMIN_PASSWORD = "AmmarGEG99$"
-
-def load_users():
-    if not os.path.exists(USERS_CSV):
-        return pd.DataFrame(columns=["email", "name", "role", "project", "status"])
-    return pd.read_csv(USERS_CSV)
-
-def save_users(df):
-    df.to_csv(USERS_CSV, index=False)
 
 def get_current_user():
     return st.session_state.get("user")
@@ -22,55 +11,59 @@ def logout_user():
     st.session_state.user = None
 
 def auto_login_super_admin():
-    if "user" not in st.session_state and st.secrets.get("firebase"):
-        try:
-            user = auth.sign_in_with_email_and_password(SUPER_ADMIN_EMAIL, SUPER_ADMIN_PASSWORD)
-            st.session_state.user = {
-                "email": SUPER_ADMIN_EMAIL,
-                "role": "super_admin",
-                "name": "Super Admin",
-                "project": "All"
-            }
-        except:
-            pass
+    if "user" not in st.session_state:
+        st.session_state.user = {
+            "email": SUPER_ADMIN_EMAIL,
+            "role": "super_admin",
+            "name": "Super Admin",
+            "project": "All"
+        }
 
 def login_user(email, password):
     try:
-        user = auth.sign_in_with_email_and_password(email, password)
-        users_df = load_users()
-        user_row = users_df[users_df["email"] == email]
-        if user_row.empty:
-            st.error("User not registered.")
+        user = auth.get_user_by_email(email)
+        uid = user.uid
+        profile = db.reference(f"users/{uid}").get()
+
+        if not profile:
+            st.error("User profile not found.")
             return
-        if user_row.iloc[0]["status"] != "approved":
+
+        if profile.get("status") != "approved":
             st.warning("Your account is not yet approved.")
             return
 
+        if profile.get("password") != password:
+            st.error("Incorrect password.")
+            return
+
         st.session_state.user = {
+            "uid": uid,
             "email": email,
-            "role": user_row.iloc[0]["role"],
-            "name": user_row.iloc[0]["name"],
-            "project": user_row.iloc[0]["project"]
+            "role": profile.get("role", "contractor"),
+            "name": profile.get("name", ""),
+            "project": profile.get("project", "")
         }
         st.success("Login successful!")
         st.experimental_rerun()
 
-    except:
-        st.error("Login failed. Check credentials.")
+    except Exception as e:
+        st.error("Login failed. Check your email and password.")
 
 def register_user(name, email, password, role, project, is_hq):
     try:
-        auth.create_user_with_email_and_password(email, password)
-        users_df = load_users()
-        new_user = pd.DataFrame([{
+        user = auth.create_user(email=email, password=password)
+        uid = user.uid
+        profile_data = {
             "email": email,
             "name": name,
             "role": role,
             "project": project,
-            "status": "pending"
-        }])
-        updated_df = pd.concat([users_df, new_user], ignore_index=True)
-        save_users(updated_df)
-        st.success("Registration submitted! Please wait for approval.")
-    except:
-        st.error("Registration failed. Email might be already registered.")
+            "status": "pending",
+            "password": password,
+            "team": is_hq
+        }
+        db.reference(f"users/{uid}").set(profile_data)
+        st.success("Registration submitted! Await approval.")
+    except Exception as e:
+        st.error("Registration failed. Email may already be in use.")
