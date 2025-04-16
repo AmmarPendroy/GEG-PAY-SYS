@@ -1,4 +1,7 @@
 streamlit
 pyrebase4
-setuptools
+firebase-admin
 fpdf
+plotly
+pandas
+setuptools
