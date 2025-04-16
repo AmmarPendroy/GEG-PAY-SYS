@@ -37,6 +37,7 @@ def show_menu():
 
     if role in ["hq_pd", "hq_admin", "super_admin"]:
         menu.append("Site Charts")
+        menu.append("Audit Log")
 
     menu.append("Help Guide")
 
@@ -59,5 +60,7 @@ else:
         st.switch_page("pages/7_Manage_Projects.py")
     elif page == "Site Charts":
         st.switch_page("pages/8_Site_Charts.py")
+    elif page == "Audit Log":
+        st.switch_page("pages/9_Audit_Log.py")
     elif page == "Help Guide":
         st.switch_page("pages/1_Help_guide.py")
