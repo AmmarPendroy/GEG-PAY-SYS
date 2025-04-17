@@ -1,5 +1,5 @@
 import streamlit as st
-from requirements import firebase_admin
+import firebase_admin
 from firebase_admin import credentials, auth, db
 
 # Load service account JSON
