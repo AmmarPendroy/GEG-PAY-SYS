@@ -1,6 +1,6 @@
 streamlit
-pyrebase4
 firebase-admin
+pyrebase4
 fpdf
 plotly
 pandas
