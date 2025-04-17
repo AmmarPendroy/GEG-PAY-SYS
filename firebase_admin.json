@@ -1,0 +1,8 @@
+from firebase_admin import db
+
+ref = db.reference("projects")
+ref.push({
+    "name": "ZAS4",
+    "location": "Erbil",
+    "remark": "Housing Phase 1"
+})
